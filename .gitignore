@@ -1,1 +1,8 @@
 build/*
+source/noninheritable.h
+source/staticcheck.h
+source/staticcontrolstructures.h
+source/functor.h
+source/main.cpp
+source/interpolator.h
+source/TEMPscrap.cpp

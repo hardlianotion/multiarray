@@ -23,11 +23,11 @@
 
 using namespace marray;
 using namespace std;
-typedef tarray< double > d_array;
-typedef tarray< double, double*, true, size_t > wd_array;
+typedef tarray<double> d_array;
+typedef tarray<double, double*, true, size_t> wd_array;
 
 
-TEST(arraytest,test_create_array) {
+TEST(arraytest,testCreateArray) {
     d_array array_(10);
     wd_array warray_(array_);
     
@@ -46,13 +46,13 @@ TEST(arraytest,test_create_array) {
     
 }
 
-TEST(arraytest,test_array_indexing) {
+TEST(arraytest,testArrayIndexing) {
     d_array array_(3);
     wd_array warray_(array_);
     
     for(
         size_t i = 0;
-        i < array_.dim();
+        i <array_.dim();
         ++i
     ) {
         array_[i] = i;
@@ -60,7 +60,7 @@ TEST(arraytest,test_array_indexing) {
     
     for(
         size_t i = 0; 
-        i < array_.dim(); 
+        i <array_.dim(); 
         ++i
     ) {
         EXPECT_EQ(array_[i], i);
@@ -73,7 +73,7 @@ TEST(arraytest,test_array_indexing) {
     EXPECT_EQ(warray_.last(), 2);
 }
 
-TEST(arraytest,test_iterator) {
+TEST(arraytest,testIterator) {
     d_array array_(10);
     wd_array warray_(array_);
     double x(0.0);

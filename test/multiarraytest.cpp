@@ -30,19 +30,44 @@ typedef tmultiarray<double, 3> dm_array3;
 typedef tmultiarray<double, 2> dm_array2;
 typedef tarray<double> dm_array;
 
+struct multiarraytest: testing::Test {
 
-TEST(multiarraytest,test_create_multiarray) {
+    virtual void 
+    setUp() {
+        array<size_t, 3> index3;
+        array<size_t, 2> index2;
+        index3[0] = 2; index3[1] = 3; index3[2] = 4; 
+        index2[0] = 2; index2[1] = 3;
+        
+        trectlayout<3> layout3(index3);
+        trectlayout<2> layout2(index2);
+        
+        array3_ = dm_array3(layout3);
+        array2_ = dm_array2(layout2);
+        double data = 0.0;
+
+        for(size_t i = 0; i < 2; ++i) {
+            for(size_t j = 0; j < 3; ++j) {
+                for(size_t k = 0; k < 4; ++k) {
+                    array3_[i][j][k] = data;
+                    ++data;
+                }
+            }
+        }
+    }
+  
+    dm_array3 array3_;
+    dm_array2 array2_;
+};
+
+TEST(multiarraytest,testCreateMultiarray) {
     array<size_t, 3> index3;
     array<size_t, 2> index2;
-    index3[0] = 2; index3[1] = 3; index3[2] = 4; 
+    index3[0] = 2, index3[1] = 3, index3[2] = 4;
     index2[0] = 2; index2[1] = 3;
     
     trectlayout<3> layout3(index3);
     trectlayout<2> layout2(index2);
-    
-    dm_array3 array_3(layout3);
-    dm_array2 array_2(layout2);
-            
     EXPECT_EQ(layout3.dim(0), 2);
     EXPECT_EQ(layout3.dim(1), 3);
     EXPECT_EQ(layout3.dim(2), 4);
@@ -51,7 +76,7 @@ TEST(multiarraytest,test_create_multiarray) {
     EXPECT_EQ(layout2.dim(1), 3);
 }
 
-TEST(multiarraytest,test_indexer) {
+TEST(multiarraytest,testIndexer) {
     array<size_t, 3> index3;
     array<size_t, 2> index2;
     index3[0] = 2, index3[1] = 3, index3[2] = 4;
@@ -69,7 +94,36 @@ TEST(multiarraytest,test_indexer) {
     trectlayout<2> layout2(index2);
 }
 
-TEST(multiarraytest,test_parallel_indexing) {
+TEST(multiarraytest,testBasicIndexing) {
+    array<size_t, 3> index3;
+    array<size_t, 2> index2;
+    index3[0] = 2; index3[1] = 3; index3[2] = 4; 
+    index2[0] = 2; index2[1] = 3;
+    
+    trectlayout<3> layout3(index3);
+    trectlayout<2> layout2(index2);
+    
+    dm_array3 array_3(layout3);
+    dm_array2 array_2(layout2);
+    double data = 0.0;
+
+    for(size_t i = 0; i < 2; ++i) {
+        for(size_t j = 0; j < 3; ++j) {
+            for(size_t k = 0; k < 4; ++k) {
+                array_3[i][j][k] = data;
+                ++data;
+            }
+        }
+    }
+    EXPECT_EQ(0, array_3[0][0][0]);
+    EXPECT_EQ(1, array_3[0][0][1]);
+    EXPECT_EQ(2, array_3[0][1][0]);
+    EXPECT_EQ(3, array_3[0][1][1]);
+    EXPECT_EQ(6, array_3[1][0][1]);
+    EXPECT_EQ(21, array_3[3][1][1]);
+}
+
+TEST(multiarraytest,testIterators) {
     array<size_t, 3> index3;
     array<size_t, 2> index2;
     index3[0] = 2; index3[1] = 3; index3[2] = 4; 
@@ -90,7 +144,6 @@ TEST(multiarraytest,test_parallel_indexing) {
     for(size_t i = 0; i <2; ++i) {
         for(size_t j = 0; j <3; ++j) {
             for(size_t k = 0; k <4; ++k) {
-                cout << "array_3[i][j][k] = " << array_3[i][j][k] << " array_3(index3) = " << array_3(index3) << endl;
                 EXPECT_EQ(array_3(index3), data);        
                 EXPECT_EQ(array_3[i][j][k], data++);
                 
@@ -99,9 +152,5 @@ TEST(multiarraytest,test_parallel_indexing) {
             ++index3[1]; index3[2] = 0;
         }
         ++index3[0]; index3[1] = 0; index3[2] = 0;
-
-        cout << endl << endl;
     }
-
 }
-

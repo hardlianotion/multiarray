@@ -7,3 +7,4 @@ source/main.cpp
 source/interpolator.h
 source/TEMPscrap.cpp
 *.swg
+*.swp

@@ -20,14 +20,12 @@
  
 #pragma once
 
+#include <initializer_list>
 #include <array>
 #include "array.h"
 #include <iostream>
 
 namespace marray {
-    
-    using std::array;
-    using namespace std;
     
     template<
         size_t N,
@@ -50,24 +48,24 @@ namespace marray {
         
         typedef S size_type;
         typedef D difference_type;
-        typedef array<S, N> index_type;
+        typedef std::array<S, N> index_type;
         typedef trectlayoutref<N, S, D> layoutref_type;
         typedef trectlayoutref<N - 1, S, D> slice_layout;
         
         enum{ RANK = N };
         enum{ MAX_INDEX = N - 1 };
         
-        trectlayout() : _index() {}
-        trectlayout(const index_type& dimensions) : _index(calculate_index(dimensions)) {}
-        trectlayout(const trectlayout& layout) : _index(layout._index) {}
-        
+        trectlayout() : index_() {}
+        trectlayout(const index_type& dimensions) : index_(calculate_index(dimensions)) {}
+        trectlayout(const trectlayout& layout) : index_(layout.index_) {}
+           
         const index_type& 
-        index() const { return _index; }
+        index() const { return index_; }
         
         size_type
         dim(size_type i) const {
             assert(i <RANK);
-            return (i <MAX_INDEX) ? _index[i] / _index[i + 1] : _index[MAX_INDEX];
+            return (i <MAX_INDEX) ? index_[i] / index_[i + 1] : index_[MAX_INDEX];
         }
         
         /**
@@ -77,7 +75,7 @@ namespace marray {
         */
         size_type
         footprint() const {
-            return _index[0];
+            return index_[0];
         }
 
         /**
@@ -89,7 +87,7 @@ namespace marray {
         size_type 
         get_stride(const index_type& idx) const {
             size_type result(*(idx.end() - 1));             
-            typename index_type::const_reverse_iterator ptr = idx.rbegin(), iptr = _index.rbegin();
+            typename index_type::const_reverse_iterator ptr = idx.rbegin(), iptr = index_.rbegin();
             
             while(++ptr != idx.rend()) {
                 result += (*ptr) * (*iptr);
@@ -122,7 +120,7 @@ namespace marray {
             return slice_layout(
                         idx, 
                         typename slice_layout::mapped_index_type(
-                            const_cast<typename index_type::iterator>(_index.begin()), RANK 
+                            index_.begin(), RANK 
                        ) 
                    );
         }
@@ -144,11 +142,10 @@ namespace marray {
                 *(idxptr + 1) *= (*idxptr);
                 ++dimptr, ++idxptr; 
             }
-            cout <<endl;
             return result;
         }
 
-        index_type _index;
+        index_type index_;
     };
     
     /**
@@ -172,19 +169,19 @@ namespace marray {
         enum{ RANK = 2 };
         enum{ MAX_INDEX = 1 };
         
-        trectlayout(const index_type& dimensions) : _index(calculate_index(dimensions)) {}
-        trectlayout(const trectlayout& layout) : _index(layout._index) {}
-        trectlayout() : _index() {}
+        trectlayout(const index_type& dimensions) : index_(calculate_index(dimensions)) {}
+        trectlayout(const trectlayout& layout) : index_(layout.index_) {}
+        trectlayout() : index_() {}
         
         size_type
         dim(size_type i) const {
             assert(i <RANK);
-            return (i <MAX_INDEX) ? _index[i] / _index[i + 1] : _index[MAX_INDEX];
+            return (i <MAX_INDEX) ? index_[i] / index_[i + 1] : index_[MAX_INDEX];
         }
 
         
         const index_type& 
-        index() const { return _index; }
+        index() const { return index_; }
         
         /**
         footprint
@@ -193,7 +190,7 @@ namespace marray {
         */
         size_type
         footprint() const {
-            return _index[0];
+            return index_[0];
         }
 
         /**
@@ -205,7 +202,7 @@ namespace marray {
         size_type 
         get_stride(const index_type& idx) const {
             size_type result(*(idx.end() - 1));             
-            typename index_type::const_iterator ptr = idx.begin(), iptr = _index.begin();
+            typename index_type::const_iterator ptr = idx.begin(), iptr = index_.begin();
             
             while(++ptr != idx.end()) {
                 result += (*ptr) * (*iptr);
@@ -234,7 +231,7 @@ namespace marray {
                 idx[j-1] = j;
             }
             
-            return slice_layout(idx, typename slice_layout::mapped_index_type(_index.begin(), index_type::RANK));
+            return slice_layout(idx, typename slice_layout::mapped_index_type(index_.begin(), index_type::RANK));
         }
         
     private:
@@ -256,7 +253,7 @@ namespace marray {
             return result;
         }
 
-        index_type _index;
+        index_type index_;
     };
     
     /**
@@ -282,16 +279,16 @@ namespace marray {
         enum{ RANK = N };
         enum{ MAX_INDEX = N - 1 };
         
-        trectlayoutref() : _index(), _mapped_index() {}
+        trectlayoutref() : index_(), mapped_index_() {}
         
         trectlayoutref(const index_type& index, const mapped_index_type& mapped_index) 
-            : _index(index), _mapped_index(mapped_index){}
+            : index_(index), mapped_index_(mapped_index){}
             
         size_type
         dim(size_type i) const {
-            assert(i <_mapped_index.dim());
-            return (_index[i] <_mapped_index.max_index()) ? 
-                    _mapped_index[_index[i] ] / _mapped_index[_index[i] + 1] : _mapped_index.last();
+            assert(i < mapped_index_.dim());
+            return (index_[i] < mapped_index_.max_index()) ? 
+                    mapped_index_[index_[i] ] / mapped_index_[index_[i] + 1] : mapped_index_.back();
         }
         
         /**
@@ -301,7 +298,7 @@ namespace marray {
         thing.  Rather it is the index position of the end() pointer in the underlying contiguous array.
         */
         size_type
-        footprint() const { return _mapped_index[ _index[0] ] ; }
+        footprint() const { return mapped_index_[ index_[0] ] ; }
         /**
         get_stride
         
@@ -311,10 +308,10 @@ namespace marray {
         size_type
         get_stride(const index_type& idx) const {
             size_type result(0);
-            typename index_type::const_iterator ptr = idx.begin(), iptr = _index.begin();
+            typename index_type::const_iterator ptr = idx.begin(), iptr = index_.begin();
             
             while(ptr != idx.end()) {
-                result += (*ptr) * (_mapped_index[*iptr]);
+                result += (*ptr) * (mapped_index_[*iptr]);
             }
             return result;
         }
@@ -339,7 +336,7 @@ namespace marray {
                 idx[j-1] = j;
             }
             
-            return slice_layout(idx, _mapped_index);
+            return slice_layout(idx, mapped_index_);
         }
         
         /**
@@ -358,8 +355,8 @@ namespace marray {
         }
         
     private:
-        mapping_index_type _index;
-        mapped_index_type _mapped_index;
+        mapping_index_type index_;
+        mapped_index_type mapped_index_;
     };
     
     template<
@@ -378,17 +375,17 @@ namespace marray {
         enum{ RANK = 2 };
         enum{ MAX_INDEX = 1 };
         
-        trectlayoutref() : _index(), _mapped_index() {}
+        trectlayoutref() : index_(), mapped_index_() {}
         
         trectlayoutref(const index_type& index, const mapped_index_type& mapped_index) 
-            : _index(index), _mapped_index(mapped_index){}
+            : index_(index), mapped_index_(mapped_index){}
 
         
         size_type
         dim(size_type i) const {
-            assert(i <_mapped_index.dim());
-            return (_index[i] <_mapped_index.max_index()) ? 
-                    _mapped_index[ _index[i] ] / _mapped_index[ _index[i] + 1 ] : _mapped_index.last();
+            assert(i < mapped_index_.dim());
+            return (index_[i] < mapped_index_.max_index()) ? 
+                    mapped_index_[ index_[i] ] / mapped_index_[ index_[i] + 1 ] : mapped_index_.back();
         }
 
         /**
@@ -398,7 +395,7 @@ namespace marray {
         thing.  Rather it is the index position of the end() pointer in the underlying contiguous array.
         */
         size_type
-        footprint() const { return _mapped_index[ _index[0] ] ; }
+        footprint() const { return mapped_index_[ index_[0] ] ; }
         
         /**
         get_stride
@@ -409,10 +406,10 @@ namespace marray {
         size_type
         get_stride(const index_type& idx) const {
             size_type result(0);
-            typename index_type::const_iterator ptr = idx.begin(), iptr = _index.begin();
+            typename index_type::const_iterator ptr = idx.begin(), iptr = index_.begin();
             
             while(ptr != idx.end()) {
-                result += (*ptr) * (_mapped_index[*iptr]);
+                result += (*ptr) * (mapped_index_[*iptr]);
             }
             return result;
         }
@@ -437,7 +434,7 @@ namespace marray {
                 idx[j-1] = j;
             }
             
-            return slice_layout(idx, _mapped_index);
+            return slice_layout(idx, mapped_index_);
         }
         
         /**
@@ -456,7 +453,7 @@ namespace marray {
         }
         
     private:
-        mapping_index_type _index;
-        mapped_index_type _mapped_index;
+        mapping_index_type index_;
+        mapped_index_type mapped_index_;
     };
 }

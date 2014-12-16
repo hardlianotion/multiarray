@@ -57,10 +57,15 @@ namespace marray {
             : base_array(rhs), layout_(rhs.layout_), slice_ref_() {}
         
         tmultiarray(
-            typename base_array::iterator begin, 
+            iterator begin, 
             const layout_type& layout 
-       ) : base_array(begin, layout.footprint()), layout_(layout), slice_ref_(){}
+        ) : base_array(begin, layout.footprint()), layout_(layout), slice_ref_(){}
         
+        ~tmultiarray(
+        ) {
+            delete base_array::begin().data();
+        }
+
         const_reference
         operator()(const index_type& idx) const {
             return base_array::operator[](layout_.get_stride(idx));

@@ -42,7 +42,7 @@ namespace marray {
     
     template<
         typename T
-    > const T* data(const T& ptr) { return ptr.data(); }
+    > const typename T::pointer_type data(const T& ptr) { return ptr.data(); }
     
     /**
     stride - EXPERIMENTAL
@@ -91,9 +91,56 @@ namespace marray {
         typename D = ptrdiff_t
     > struct titerator {
         typedef T value_type;
-        typedef PT pointer;
+        typedef PT pointer_type;
         typedef S size_type;
         typedef D difference_type;
+        
+        titerator(PT ptr) : ptr_(ptr) {}
+        titerator(const titerator& rhs): ptr_(rhs.ptr_) {}
+ 
+        operator PT() { return ptr_; }
+        
+        titerator& 
+        operator++() { ++ptr_; return *this; }
+        
+        titerator& 
+        operator--() { --ptr_; return *this; }
+        
+        titerator 
+        operator--(int) { titerator result(*this); --ptr_; return result; }
+        
+        titerator 
+        operator++(int) { titerator result(*this); ++ptr_; return result; }
+        
+        titerator&
+        operator+=(difference_type n) { ptr_ += n; return *this; }
+
+        titerator&
+        operator-=(difference_type n) { ptr_ -= n; return *this; }
+        
+        titerator
+        operator+(difference_type n) const { titerator result(*this); return result += n; }
+
+        titerator
+        operator-(difference_type n) const { titerator result(*this); return result -= n; }
+        
+        difference_type
+        operator-(const titerator& rhs) const { return strides(rhs.ptr_, ptr_);  }
+        
+        difference_type
+        stride() const { return marray::stride(ptr_); } //weird - marray::stride to prevent compiler complaining about titerator::stride.
+        
+        T&
+        operator*() { return *ptr_; }
+        
+        PT
+        data() { return ptr_; }
+        
+        PT
+        data() const { return ptr_; }
+    private:
+
+        PT ptr_;        
     };
     
     /**
@@ -103,56 +150,52 @@ namespace marray {
     iterator object.  
     */
     template<
-        typename T,
-        typename PT = T*,
-        typename S = size_t,
-        typename D = ptrdiff_t
-    > struct tconst : titerator<T, PT, S, D> {
+        typename IT
+    > struct tconst : private virtual IT {
         
-        typedef typename titerator<T, PT, S, D>::difference_type difference_type;
-        
-        tconst(PT ptr) : _ptr(ptr) {}
-        
-        operator PT() { return _ptr; }
+        typedef typename IT::difference_type difference_type;
+        typedef const typename IT::pointer_type pointer_type; 
+        typedef typename IT::size_type size_type;
+        typedef const typename IT::value_type value_type;
+
+        tconst(pointer_type ptr) : IT(ptr) {}
+        tconst(IT ptr): IT(ptr) {}
         
         tconst& 
-        operator++() { ++_ptr; return *this; }
+        operator++() { IT::operator++(); return *this;}
         
         tconst& 
-        operator--() { --_ptr; return *this; }
+        operator--() { IT::operator--(); return *this;}
         
         tconst 
-        operator--(int) { tconst result(*this); return --result; }
+        operator--(int) { return tconst(IT::operator--(1)); }
         
         tconst 
-        operator++(int) { tconst result(*this); return ++result; }
+        operator++(int) { return tconst(IT::operator++(1)); }
         
         tconst&
-        operator+=(difference_type n) { _ptr += n; return *this; }
+        operator+=(difference_type n) { IT::operator+=(n); return *this; }
 
         tconst&
-        operator-=(difference_type n) { _ptr -= n; return *this; }
+        operator-=(difference_type n) { IT::operator-=(n); return *this; }
         
         tconst
-        operator+(difference_type n) const { tconst result(*this); return result += n; }
+        operator+(difference_type n) const { IT::operator+(n); return *this;}
 
         tconst
-        operator-(difference_type n) const { tconst result(*this); return result -= n; }
+        operator-(difference_type n) const { IT::operator-(n); return *this;}
         
         difference_type
-        operator-(const tconst& rhs) const { return strides(rhs._ptr, _ptr);  }
+        operator-(const tconst& rhs) const { return IT::operator-(rhs); }
         
         difference_type
-        stride() const { return marray::stride(_ptr); } //weird - marray::stride to prevent compiler complaining about tconst::stride.
+        stride() const { return IT::stride(); } //weird - marray::stride to prevent compiler complaining about tconst::stride.
         
-        const T&
-        operator*() const { return *_ptr; }
+        value_type
+        operator*() { return IT::operator*(); }
         
-        PT
-        data() const { return _ptr; }
-        
-    private:
-        PT _ptr;
+        pointer_type
+        data() const { return IT::data(); }
     };
     /**
     tstrideiterator - EXPERIMENTAL

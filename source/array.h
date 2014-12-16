@@ -34,26 +34,26 @@ namespace marray {
         typedef const T& const_reference;
         typedef S size_type;
         typedef D difference_type;
-        typedef PT iterator;
-        typedef tconst<T, PT, S, D> const_iterator;
+        typedef titerator<T, PT, S, D>  iterator;
+        typedef tconst<iterator> const_iterator;
         
         reference
-        operator[](size_type i) { return *(_begin + i); }
+        operator[](size_type i) { return *(begin_ + i); }
         
         const_reference
-        operator[](size_type i) const { return *(_begin + i); }
+        operator[](size_type i) const { return *(begin_ + i); }
         
         const_iterator
-        begin() const {return const_iterator(_begin);  }
+        begin() const {return const_iterator(begin_);  }
         
         iterator
-        begin() { return _begin; }
+        begin() { return begin_; }
         
         const_iterator
-        end() const { return const_iterator(_end);  }
+        end() const { return const_iterator(end_);  }
         
         iterator
-        end() { return _end; }
+        end() { return end_; }
         
         size_type
         dim() const {
@@ -64,32 +64,33 @@ namespace marray {
         max_index() const { return dim() - 1; }
         
         const_reference
-        first() const { return *this->begin(); }
+        front() const { return *this->begin(); }
         
         reference
-        first() { return *this->begin(); }
+        front() { return *this->begin(); }
         
         const_reference
-        last() const { return *(this->end() - 1); }
+        back() const { return *(this->end() - 1); }
         
         reference
-        last() { return *(this->end() - 1); }
+        back() { return *(this->end() - 1); }
         
         void
         reset(iterator begin, iterator end) {
-            _begin = begin;
-            _end = end;
+            begin_ = begin;
+            end_ = end;
         }
         
     protected:
-        tindexeddata() : _begin(NULL), _end(NULL) {}
-        tindexeddata(const tindexeddata& rhs) : _begin(rhs._begin), _end(rhs._end) {}
-        tindexeddata(iterator begin, iterator end) : _begin(begin), _end(end) {}
-        tindexeddata(iterator begin, size_type dim) : _begin(begin), _end(begin + dim) {}
-        tindexeddata(const_iterator begin, const_iterator end) : _begin(begin.data()), _end(end.data()) {}
+        tindexeddata() : begin_(nullptr), end_(nullptr) {}
+        tindexeddata(const tindexeddata& rhs) : begin_(rhs.begin_), end_(rhs.end_) {}
+        tindexeddata(iterator begin, iterator end) : begin_(begin), end_(end) {}
+        tindexeddata(iterator begin, size_type dim) : begin_(begin), end_(begin + dim) {}
+        tindexeddata(const_iterator begin, size_type dim) : begin_(begin.data()), end_(begin + dim) {}
+        tindexeddata(const_iterator begin, const_iterator end) : begin_(begin.data()), end_(end.data()) {}
     private:
-        iterator _begin;
-        iterator _end;
+        iterator begin_;
+        iterator end_;
     };
     
     template<
@@ -105,17 +106,17 @@ namespace marray {
         typedef typename tindexeddata<T, PT, S, D>::reference reference;
         typedef typename tindexeddata<T, PT, S, D>::const_reference const_reference;
 
-        tarray() : tindexeddata<T, PT, S> (NULL, NULL) {}
+        tarray() : tindexeddata<T, PT, S> (nullptr, nullptr) {}
         
         tarray(const tarray& rhs) : tindexeddata<T, PT, S> (rhs.begin(), rhs.end()) {}
-        
+         
         tarray(iterator data, size_type n) 
             : tindexeddata<T, PT, S> (data, n) {}
         
-        tarray(size_type n) : tindexeddata<T, PT, S> (new T[n], n) {}
+        tarray(size_type n) : tindexeddata<T, PT, S> (iterator(new T[n]), n) {}
         
         ~tarray() {
-            delete [] this->begin();
+            delete [] this->begin().data();
         }
     };
     
@@ -136,7 +137,7 @@ namespace marray {
 
         tarray(const tarray& rhs) : tindexeddata<T, PT, S, D> (rhs.begin(), rhs.end()) {}
         
-        tarray(const tarray<T, PT, false, S>& rhs) : tindexeddata<T, PT, S, D> (rhs.begin(), rhs.dim()) {}
+        tarray(const tarray<T, PT, false, S>& rhs) : tindexeddata<T, PT, S, D> (iterator(rhs.begin().data()), rhs.dim()) {}
 
         tarray(iterator data, size_type n) 
         : tindexeddata<T, PT, S> (data, n) {}

@@ -67,10 +67,10 @@ TEST(arraytest,testArrayIndexing) {
         EXPECT_EQ(warray_[i], i);
     }
     
-    EXPECT_EQ(array_.first(), 0);
-    EXPECT_EQ(array_.last(), 2);
-    EXPECT_EQ(warray_.first(), 0);
-    EXPECT_EQ(warray_.last(), 2);
+    EXPECT_EQ(array_.front(), 0);
+    EXPECT_EQ(array_.back(), 2);
+    EXPECT_EQ(warray_.front(), 0);
+    EXPECT_EQ(warray_.back(), 2);
 }
 
 TEST(arraytest,testIterator) {

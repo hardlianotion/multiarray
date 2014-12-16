@@ -11,7 +11,8 @@ INCLUDE_DIRECTORIES(
 
 ADD_EXECUTABLE(
     arraytests
-
+    
+    iteratortest.cpp
     arraytest.cpp
     multiarraytest.cpp
 )

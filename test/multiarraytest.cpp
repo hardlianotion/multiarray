@@ -31,6 +31,7 @@ typedef tmultiarray<double, 2> dm_array2;
 typedef tarray<double> dm_array;
 
 struct multiarraytest: testing::Test {
+    multiarraytest(): array3_(trectlayout<3>({2,3,4})), array2_(trectlayout<2>{{2,3}}){}
 
     virtual void 
     setUp() {
@@ -60,7 +61,7 @@ struct multiarraytest: testing::Test {
     dm_array2 array2_;
 };
 
-TEST(multiarraytest,testCreateMultiarray) {
+TEST_F(multiarraytest,testCreateMultiarray) {
     array<size_t, 3> index3;
     array<size_t, 2> index2;
     index3[0] = 2, index3[1] = 3, index3[2] = 4;
@@ -76,7 +77,7 @@ TEST(multiarraytest,testCreateMultiarray) {
     EXPECT_EQ(layout2.dim(1), 3);
 }
 
-TEST(multiarraytest,testIndexer) {
+TEST_F(multiarraytest,testIndexer) {
     array<size_t, 3> index3;
     array<size_t, 2> index2;
     index3[0] = 2, index3[1] = 3, index3[2] = 4;
@@ -94,7 +95,7 @@ TEST(multiarraytest,testIndexer) {
     trectlayout<2> layout2(index2);
 }
 
-TEST(multiarraytest,testBasicIndexing) {
+TEST_F(multiarraytest,testBasicIndexing) {
     array<size_t, 3> index3;
     array<size_t, 2> index2;
     index3[0] = 2; index3[1] = 3; index3[2] = 4; 
@@ -123,7 +124,7 @@ TEST(multiarraytest,testBasicIndexing) {
     EXPECT_EQ(21, array_3[3][1][1]);
 }
 
-TEST(multiarraytest,testIterators) {
+TEST_F(multiarraytest,testIterators) {
     array<size_t, 3> index3;
     array<size_t, 2> index2;
     index3[0] = 2; index3[1] = 3; index3[2] = 4; 

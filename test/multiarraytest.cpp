@@ -21,7 +21,7 @@
 #include <multiarray.h>
 #include <cmath>
 #include <iostream>
-#include <gtest/gtest.h>
+#include <catch/catch.hpp>
 
 using namespace marray;
 using namespace std;
@@ -30,7 +30,7 @@ typedef tmultiarray<double, 3> dm_array3;
 typedef tmultiarray<double, 2> dm_array2;
 typedef tarray<double> dm_array;
 
-struct multiarraytest: testing::Test {
+struct multiarraytest{
     multiarraytest(): array3_(trectlayout<3>({2,3,4})), array2_(trectlayout<2>{{2,3}}){}
 
     virtual void 
@@ -61,7 +61,7 @@ struct multiarraytest: testing::Test {
     dm_array2 array2_;
 };
 
-TEST_F(multiarraytest,testCreateMultiarray) {
+TEST_CASE("marray with a rect template has its data as dimensions","[marray]") {
     array<size_t, 3> index3;
     array<size_t, 2> index2;
     index3[0] = 2, index3[1] = 3, index3[2] = 4;
@@ -69,15 +69,16 @@ TEST_F(multiarraytest,testCreateMultiarray) {
     
     trectlayout<3> layout3(index3);
     trectlayout<2> layout2(index2);
-    EXPECT_EQ(layout3.dim(0), 2);
-    EXPECT_EQ(layout3.dim(1), 3);
-    EXPECT_EQ(layout3.dim(2), 4);
     
-    EXPECT_EQ(layout2.dim(0), 2);
-    EXPECT_EQ(layout2.dim(1), 3);
+    REQUIRE(layout3.dim(0) == 2);
+    REQUIRE(layout3.dim(1) == 3);
+    REQUIRE(layout3.dim(2) == 4);
+    
+    REQUIRE(layout2.dim(0) == 2);
+    REQUIRE(layout2.dim(1) == 3);
 }
 
-TEST_F(multiarraytest,testIndexer) {
+TEST_CASE("Indexing a multi array slice identifies correct data","[marray]") {
     array<size_t, 3> index3;
     array<size_t, 2> index2;
     index3[0] = 2, index3[1] = 3, index3[2] = 4;
@@ -86,16 +87,16 @@ TEST_F(multiarraytest,testIndexer) {
     
     trectlayout<3>::slice_layout layout3_slice = layout3.slice(1);
             
-    EXPECT_EQ(layout3.dim(0), 2);
-    EXPECT_EQ(layout3.dim(1), 3);
-    EXPECT_EQ(layout3.dim(2), 4);
+    REQUIRE(layout3.dim(0) == 2);
+    REQUIRE(layout3.dim(1) == 3);
+    REQUIRE(layout3.dim(2) == 4);
 
-    EXPECT_EQ(layout3_slice.dim(0), 2);
-    EXPECT_EQ(layout3_slice.dim(1), 4);
+    REQUIRE(layout3_slice.dim(0) == 2);
+    REQUIRE(layout3_slice.dim(1) == 4);
     trectlayout<2> layout2(index2);
 }
 
-TEST_F(multiarraytest,testBasicIndexing) {
+TEST_CASE("Indeixing in the natural direction is consistent","[marray]") {
     array<size_t, 3> index3;
     array<size_t, 2> index2;
     index3[0] = 2; index3[1] = 3; index3[2] = 4; 
@@ -116,15 +117,15 @@ TEST_F(multiarraytest,testBasicIndexing) {
             }
         }
     }
-    EXPECT_EQ(0, array_3[0][0][0]);
-    EXPECT_EQ(1, array_3[0][0][1]);
-    EXPECT_EQ(2, array_3[0][1][0]);
-    EXPECT_EQ(3, array_3[0][1][1]);
-    EXPECT_EQ(6, array_3[1][0][1]);
-    EXPECT_EQ(21, array_3[3][1][1]);
+    REQUIRE(0 == array_3[0][0][0]);
+    REQUIRE(1 == array_3[0][0][1]);
+    REQUIRE(2 == array_3[0][1][0]);
+    REQUIRE(3 == array_3[0][1][1]);
+    REQUIRE(6 == array_3[1][0][1]);
+    REQUIRE(21 == array_3[3][1][1]);
 }
 
-TEST_F(multiarraytest,testIterators) {
+TEST_CASE("Multidimensional iterators iterate along most coherent axis","[marray]") {
     array<size_t, 3> index3;
     array<size_t, 2> index2;
     index3[0] = 2; index3[1] = 3; index3[2] = 4; 
@@ -145,8 +146,8 @@ TEST_F(multiarraytest,testIterators) {
     for(size_t i = 0; i <2; ++i) {
         for(size_t j = 0; j <3; ++j) {
             for(size_t k = 0; k <4; ++k) {
-                EXPECT_EQ(array_3(index3), data);        
-                EXPECT_EQ(array_3[i][j][k], data++);
+                REQUIRE(array_3(index3) == data);        
+                REQUIRE(array_3[i][j][k] == data++);
                 
                 ++index3[2];
             }

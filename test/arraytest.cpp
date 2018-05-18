@@ -17,9 +17,10 @@
  *      along with this program; if not, write to the Free Software
  *      Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+#define CATCH_CONFIG_MAIN 
 #include <array.h>
 #include <vector>
-#include <gtest/gtest.h>
+#include <catch/catch.hpp>
 
 using namespace marray;
 using namespace std;
@@ -27,12 +28,12 @@ typedef tarray<double> d_array;
 typedef tarray<double, double*, true, size_t> wd_array;
 
 
-TEST(arraytest,testCreateArray) {
+TEST_CASE("Test weak arrays refer to underlying array", "[array]") {
     d_array array_(10);
     wd_array warray_(array_);
     
-    EXPECT_EQ(warray_.dim(), 10);
-    EXPECT_EQ(array_.dim(), 10);
+    REQUIRE(warray_.dim() == 10);
+    REQUIRE(array_.dim() == 10);
 
     wd_array::iterator wptr = warray_.begin();
     
@@ -41,18 +42,18 @@ TEST(arraytest,testCreateArray) {
         ptr != array_.end();
         ++ptr, ++wptr
      ) {
-        EXPECT_EQ(*ptr, *wptr);
+        REQUIRE(*ptr == *wptr);
     }
     
 }
 
-TEST(arraytest,testArrayIndexing) {
+TEST_CASE("Test weak indexing is consistent with array","[array]") {
     d_array array_(3);
     wd_array warray_(array_);
     
     for(
         size_t i = 0;
-        i <array_.dim();
+        i < array_.dim();
         ++i
     ) {
         array_[i] = i;
@@ -60,20 +61,20 @@ TEST(arraytest,testArrayIndexing) {
     
     for(
         size_t i = 0; 
-        i <array_.dim(); 
+        i < array_.dim(); 
         ++i
     ) {
-        EXPECT_EQ(array_[i], i);
-        EXPECT_EQ(warray_[i], i);
+        REQUIRE(array_[i] == i);
+        REQUIRE(warray_[i] == i);
     }
     
-    EXPECT_EQ(array_.front(), 0);
-    EXPECT_EQ(array_.back(), 2);
-    EXPECT_EQ(warray_.front(), 0);
-    EXPECT_EQ(warray_.back(), 2);
+    REQUIRE(array_.front() == 0);
+    REQUIRE(array_.back() == 2);
+    REQUIRE(warray_.front() == 0);
+    REQUIRE(warray_.back() == 2);
 }
 
-TEST(arraytest,testIterator) {
+TEST_CASE("Iterators for weak arrays and arrays work the same way", "[array]") {
     d_array array_(10);
     wd_array warray_(array_);
     double x(0.0);
@@ -96,9 +97,9 @@ TEST(arraytest,testIterator) {
         ptr != warray_.end();
         ++ptr, ++wcptr, ++cptr
     ) {
-        EXPECT_EQ(*ptr, x++);
-        EXPECT_EQ(*cptr, *ptr);
-        EXPECT_EQ(*wcptr, *ptr);
+        REQUIRE(*ptr == x++);
+        REQUIRE(*cptr == *ptr);
+        REQUIRE(*wcptr == *ptr);
     }
 }
 

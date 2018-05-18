@@ -6,6 +6,7 @@ LINK_DIRECTORIES(
 
 INCLUDE_DIRECTORIES(
     ${multiarray_SOURCE_DIR}/source
+    ${multiarray_SOURCE_DIR}/thirdparty
     /usr/local/include
 )
 
@@ -15,11 +16,4 @@ ADD_EXECUTABLE(
     iteratortest.cpp
     arraytest.cpp
     multiarraytest.cpp
-)
-
-TARGET_LINK_LIBRARIES( 
-    arraytests
-
-    gtest
-    gtest_main
 )

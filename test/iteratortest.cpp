@@ -19,7 +19,7 @@
  */
 #include <array.h>
 #include <vector>
-#include <gtest/gtest.h>
+#include <catch/catch.hpp>
 
 using namespace marray;
 using namespace std;
@@ -27,7 +27,7 @@ typedef tarray<double> d_array;
 typedef tarray<double, double*, true, size_t> wd_array;
 
 
-TEST(iteratortest, iterationWorks) {
+TEST_CASE("iterators increment works like ptr", "[marray]") {
     d_array array_(10);
     array_[9] = 10; 
     
@@ -37,30 +37,30 @@ TEST(iteratortest, iterationWorks) {
         ptr != array_.end();
         ++ptr, ++i
      ) {
-        EXPECT_EQ(*ptr, array_[i]);
+        REQUIRE(*ptr == array_[i]);
     }
-    EXPECT_EQ(10, array_[9]);
+    REQUIRE(10 == array_[9]);
     
 }
 
-TEST(iteratortest, canAssignIteratorToConstIterator) {
+TEST_CASE("Can initialise const iterator with an iterator", "[marray]") {
     d_array array_(10);
     array_[9] = 10;
-    
+   
     d_array::iterator ptr = array_.begin();
     tconst<d_array::iterator> cptr(ptr);
 
-    EXPECT_EQ(array_.begin(), cptr);
+    REQUIRE(array_.begin() == cptr);
 
     while(ptr != array_.end()) {
-        EXPECT_TRUE(ptr != array_.end());
-        EXPECT_EQ(*ptr, *cptr);
+        REQUIRE(ptr != array_.end());
+        REQUIRE(*ptr == *cptr);
         
         d_array::iterator nptr = ptr++;
-        EXPECT_EQ(1, ptr - nptr);
+        REQUIRE(1 == ptr - nptr);
         tconst<d_array::iterator> ncptr = cptr++;
-        EXPECT_EQ(1, cptr - ncptr);
+        REQUIRE(1 == cptr - ncptr);
     }
-    EXPECT_EQ(10,*(--cptr));
+    REQUIRE(10 == *(--cptr));
 }
 

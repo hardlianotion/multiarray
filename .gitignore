@@ -8,3 +8,4 @@ source/interpolator.h
 source/TEMPscrap.cpp
 *.swg
 *.swp
+tags
